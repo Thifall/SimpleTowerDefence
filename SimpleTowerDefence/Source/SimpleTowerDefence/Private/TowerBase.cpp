@@ -106,7 +106,6 @@ bool ATowerBase::EnsureHasTarget()
 		if (_enemiesInRange.Num() > 0)
 		{
 			_currentTarget = _enemiesInRange[0];
-			_currentTarget->OnDestroyed.AddDynamic(this, &ATowerBase::OnTargetDestroyed);
 			hasTarget = true;
 		}
 	}
