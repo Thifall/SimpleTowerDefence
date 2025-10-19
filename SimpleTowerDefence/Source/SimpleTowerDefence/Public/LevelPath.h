@@ -33,6 +33,6 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	float SpawnCooldown = 0.0f;
-	
+	float _spawnCooldown = 0.0f;
+	void SpawnEnemy(float deltaTime);
 };

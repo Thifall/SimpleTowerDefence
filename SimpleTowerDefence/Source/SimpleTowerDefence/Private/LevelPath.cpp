@@ -19,7 +19,12 @@ void ALevelPath::BeginPlay()
 void ALevelPath::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (SpawnCooldown <= 0.0f && EnemiesToSpawn > 0)
+	SpawnEnemy(DeltaTime);
+}
+
+void ALevelPath::SpawnEnemy(float deltaTime)
+{
+	if (_spawnCooldown <= 0.0f && EnemiesToSpawn > 0)
 	{
 		UPathComponent* path = NewObject<UPathComponent>(this);
 
@@ -36,12 +41,13 @@ void ALevelPath::Tick(float DeltaTime)
 			SpawnedEnemy->SetPath(path);
 			UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
 		}
-		SpawnCooldown = SpawnInterval;
+
+		_spawnCooldown = SpawnInterval;
 		EnemiesToSpawn--;
 	}
 	else
 	{
-		SpawnCooldown -= DeltaTime;
+		_spawnCooldown -= deltaTime;
 	}
 }
 
