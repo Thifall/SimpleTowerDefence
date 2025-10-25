@@ -2,8 +2,8 @@
 
 
 #include "TowerBase.h"
-#include <Kismet/GameplayStatics.h>
-#include <ProjectileBase.h>
+#include "Kismet/GameplayStatics.h"
+#include "Projectiles/ProjectileBase.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values

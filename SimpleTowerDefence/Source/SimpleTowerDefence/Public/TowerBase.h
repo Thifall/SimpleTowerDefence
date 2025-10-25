@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include <EnemyBase.h>
 #include <Components/BoxComponent.h>
-#include <ProjectileBase.h>
+#include "Projectiles/ProjectileBase.h"
 #include "TowerBase.generated.h"
 
 UCLASS(Blueprintable)
