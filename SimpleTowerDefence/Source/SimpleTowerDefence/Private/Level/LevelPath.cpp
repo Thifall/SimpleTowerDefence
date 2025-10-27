@@ -1,10 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "LevelPath.h"
+#include "Level/LevelPath.h"
 #include "Kismet/GameplayStatics.h"
-#include "Engine/TargetPoint.h"
-#include "GameFramework/Actor.h"
 
 ALevelPath::ALevelPath()
 {
@@ -50,5 +45,3 @@ void ALevelPath::SpawnEnemy(float deltaTime)
 		_spawnCooldown -= deltaTime;
 	}
 }
-
-

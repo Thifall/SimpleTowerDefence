@@ -1,10 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "TowerBase.h"
+#include "Towers/TowerBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "Projectiles/ProjectileBase.h"
-#include "Components/BoxComponent.h"
 
 // Sets default values
 ATowerBase::ATowerBase()
@@ -134,4 +129,3 @@ void ATowerBase::ShootProjectileAtTarget()
 		UGameplayStatics::FinishSpawningActor(spawnedProjectile, spawnTransform);
 	}
 }
-

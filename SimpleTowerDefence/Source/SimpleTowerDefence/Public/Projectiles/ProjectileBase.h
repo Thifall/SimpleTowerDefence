@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "EnemyBase.h"
+#include "Enemies/EnemyBase.h"
 #include "ProjectileBase.generated.h"
 
 /**

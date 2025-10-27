@@ -1,7 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "EnemyBase.h"
+#include "Enemies/EnemyBase.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -60,4 +57,3 @@ void AEnemyBase::MoveAlongPath(float DeltaTime)
 		SetActorLocation(currentLocation + direction * FMath::Min(step, distanceToTarget));
 	}
 }
-

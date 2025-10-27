@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include <EnemyBase.h>
-#include <Components/BoxComponent.h>
+#include "Enemies/EnemyBase.h"
+#include "Components/BoxComponent.h"
 #include "Projectiles/ProjectileBase.h"
 #include "TowerBase.generated.h"
 

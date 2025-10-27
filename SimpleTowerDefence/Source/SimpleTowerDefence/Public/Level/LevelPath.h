@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include <PathComponent.h>
-#include <EnemyBase.h>
+#include "Engine/TargetPoint.h"
+#include "Enemies/EnemyBase.h"
+#include "PathComponent.h"
 #include "LevelPath.generated.h"
 
 UCLASS()

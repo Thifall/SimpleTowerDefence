@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include <PathComponent.h>
+#include "PathComponent.h"
 #include "EnemyBase.generated.h"
 
 UCLASS()
