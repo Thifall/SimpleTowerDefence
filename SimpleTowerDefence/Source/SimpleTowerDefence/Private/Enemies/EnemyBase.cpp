@@ -1,59 +1,142 @@
 #include "Enemies/EnemyBase.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/DamageType.h"
+#include "Kismet/GameplayStatics.h"
 
 AEnemyBase::AEnemyBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = true;
+
+    // Setup collision
+    CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
+    CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
+    CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
+    RootComponent = CapsuleComponent;
+
+    // Setup mesh
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+    MeshComponent->SetupAttachment(RootComponent);
+    MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-// Called when the game starts or when spawned
 void AEnemyBase::BeginPlay()
 {
-	Super::BeginPlay();
-
-}
-
-void AEnemyBase::SetPath(UPathComponent* path)
-{
-	PathComponent = path;
+    Super::BeginPlay();
+    
+    // Initialize health
+    CurrentHealth = MaxHealth;
 }
 
 void AEnemyBase::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-	MoveAlongPath(DeltaTime);
+    Super::Tick(DeltaTime);
+    
+    if (IsAlive())
+    {
+        UpdateMovement(DeltaTime);
+    }
 }
 
-void AEnemyBase::MoveAlongPath(float DeltaTime)
+void AEnemyBase::SetPath(UPathComponent* path)
 {
-	if (!PathComponent || PathComponent->PathNodes.Num() == 0)
-	{
-		return;
-	}
+    PathComponent = path;
+    CurrentWaypointIndex = 0;
+}
 
-	if (!PathComponent->PathNodes.IsValidIndex(_currentPathIndex))
-	{
-		return;
-	}
+float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    if (!IsAlive() || DamageAmount <= 0.0f)
+        return 0.0f;
 
-	AActor* currentTargetNode = PathComponent->PathNodes[_currentPathIndex];
-	FVector targetLocation = currentTargetNode->GetActorLocation();
-	FVector currentLocation = GetActorLocation();
+    const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+    CurrentHealth = FMath::Max(0.0f, CurrentHealth - ActualDamage);
 
-	float distanceToTarget = (currentTargetNode->GetActorLocation() - GetActorLocation()).Size();
+    // Handle damage events
+    if (CurrentHealth > 0.0f)
+    {
+        OnEnemyDamaged.Broadcast(ActualDamage, CurrentHealth);
+        OnDamaged(ActualDamage, CurrentHealth);
+    }
+    else
+    {
+        OnEnemyDied.Broadcast(this);
+        OnDeath();
+    }
 
-	if (distanceToTarget < _reachThreshold)
-	{
-		_currentPathIndex++;
-		if (_currentPathIndex >= PathComponent->PathNodes.Num())
-		{
-			Destroy();
-			return;
-		}
-	}
-	else
-	{
-		FVector direction = (targetLocation - GetActorLocation()).GetSafeNormal();
-		float step = MovementSpeed * DeltaTime;
-		SetActorLocation(currentLocation + direction * FMath::Min(step, distanceToTarget));
-	}
+    return ActualDamage;
+}
+
+void AEnemyBase::OnDeath_Implementation()
+{
+    // Base implementation simply destroys the actor
+    // Override in BP to add effects/rewards before destroying
+    Destroy();
+}
+
+void AEnemyBase::OnDamaged_Implementation(float DamageAmount, float HealthRemaining)
+{
+    // Base implementation does nothing
+    // Override in BP to add damage effects/feedback
+}
+
+void AEnemyBase::OnReachedEnd_Implementation()
+{
+    // Base implementation simply destroys the actor
+    // Override in BP to handle reaching the end (e.g. damage player base)
+    Destroy();
+}
+
+void AEnemyBase::UpdateMovement(float DeltaTime)
+{
+    if (!PathComponent || PathComponent->PathNodes.Num() == 0)
+    {
+        return;
+    }
+
+    if (!PathComponent->PathNodes.IsValidIndex(CurrentWaypointIndex))
+    {
+        return;
+    }
+
+    // Get current waypoint
+    AActor* CurrentWaypoint = PathComponent->PathNodes[CurrentWaypointIndex];
+    if (!CurrentWaypoint)
+    {
+        return;
+    }
+
+    // Calculate movement
+    FVector CurrentLocation = GetActorLocation();
+    FVector TargetLocation = CurrentWaypoint->GetActorLocation();
+    FVector DirectionToTarget = (TargetLocation - CurrentLocation).GetSafeNormal();
+    
+    // Rotate to face movement direction
+    FRotator NewRotation = DirectionToTarget.Rotation();
+    SetActorRotation(NewRotation);
+
+    // Move towards waypoint
+    float DistanceToTarget = FVector::Distance(CurrentLocation, TargetLocation);
+    if (DistanceToTarget <= ReachThreshold)
+    {
+        // Reached waypoint - move to next one
+        CurrentWaypointIndex++;
+        
+        if (IsAtFinalWaypoint())
+        {
+            OnReachedEnd();
+            return;
+        }
+    }
+    else
+    {
+        // Continue moving towards current waypoint
+        float MovementStep = MovementSpeed * DeltaTime;
+        FVector NewLocation = CurrentLocation + DirectionToTarget * FMath::Min(MovementStep, DistanceToTarget);
+        SetActorLocation(NewLocation);
+    }
+}
+
+bool AEnemyBase::IsAtFinalWaypoint() const
+{
+    return PathComponent && !PathComponent->PathNodes.IsValidIndex(CurrentWaypointIndex);
 }

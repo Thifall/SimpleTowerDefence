@@ -19,4 +19,9 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
+
+    /** Distance within which the projectile will be considered to have hit the target */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+    float HitDistance = 20.f;
 };
