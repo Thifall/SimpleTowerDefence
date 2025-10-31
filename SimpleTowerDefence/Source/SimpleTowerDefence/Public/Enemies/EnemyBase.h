@@ -7,6 +7,7 @@
 #include "PathComponent.h"
 #include "GameFramework/DamageType.h"
 #include "Components/CapsuleComponent.h"
+#include "UI/Enemies/EnemyHealthBarComponent.h"
 #include "EnemyBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDiedSignature, class AEnemyBase*, Enemy);
@@ -23,6 +24,9 @@ class SIMPLETOWERDEFENCE_API AEnemyBase : public AActor
 
 public:
     AEnemyBase();
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|UI")
+    UEnemyHealthBarComponent* EnemyUI;
 
     /** Called when enemy dies (health reaches 0) */
     UPROPERTY(BlueprintAssignable, Category = "Enemy|Events")
@@ -56,6 +60,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Enemy|Stats")
     bool IsAlive() const { return CurrentHealth > 0.0f; }
 
+    /** Override to handle incoming damage. Return final damage dealt. */
+    virtual float InflictDamage(float DamageAmount, AActor* DamageCauser);
+
 protected:
     /** Physical collision for this enemy */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -76,10 +83,6 @@ protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
     
-    /** Override to handle incoming damage. Return final damage dealt. */
-    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, 
-        class AController* EventInstigator, AActor* DamageCauser) override;
-
     /** Called when health reaches 0. Override in blueprints for death effects */
     UFUNCTION(BlueprintNativeEvent, Category = "Enemy|Events")
     void OnDeath();
