@@ -9,9 +9,12 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class SIMPLETOWERDEFENCE_API AAreaDamageTower : public ATowerBase
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void Tick(float DeltaTime) override;
+	void DealAreaDamage();
 };

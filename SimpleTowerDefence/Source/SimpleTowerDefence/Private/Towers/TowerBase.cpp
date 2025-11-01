@@ -1,5 +1,4 @@
 #include "Towers/TowerBase.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATowerBase::ATowerBase()
@@ -7,8 +6,9 @@ ATowerBase::ATowerBase()
 	RootMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootMesh"));
 	SetRootComponent(RootMeshComponent);
 
-	EnemyDetection = CreateDefaultSubobject<UBoxComponent>(TEXT("EnemyDetection"));
+	EnemyDetection = CreateDefaultSubobject<USphereComponent>(TEXT("EnemyDetection"));
 	EnemyDetection->SetupAttachment(RootComponent);
+	EnemyDetection->InitSphereRadius(300.f);
 	EnemyDetection->SetCollisionProfileName(TEXT("OverlapAll"));
 	EnemyDetection->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	EnemyDetection->SetGenerateOverlapEvents(true);
@@ -25,6 +25,18 @@ void ATowerBase::BeginPlay()
 
 	EnemyDetection->OnComponentBeginOverlap.AddDynamic(this, &ATowerBase::OnEnemyBeginOverlap);
 	EnemyDetection->OnComponentEndOverlap.AddDynamic(this, &ATowerBase::OnEnemyEndOverlap);
+
+	if (AuraMesh)
+	{
+		AuraMaterialInstance = AuraMesh->CreateDynamicMaterialInstance(0);
+		if (AuraMaterialInstance)
+		{
+			// ustaw pocz¹tkowe wartoœci parametrów
+			AuraMaterialInstance->SetScalarParameterValue(TEXT("AttackTime"), _timeSinceLastAttack);
+			AuraMaterialInstance->SetScalarParameterValue(TEXT("Cooldown"), 1.f / AttackSpeed);
+			AuraMaterialInstance->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(0.2f, 0.5f, 1.f));
+		}
+	}
 	return;
 }
 
@@ -32,6 +44,7 @@ void ATowerBase::BeginPlay()
 void ATowerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	_timeSinceLastAttack += DeltaTime;
 }
 
 void ATowerBase::OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

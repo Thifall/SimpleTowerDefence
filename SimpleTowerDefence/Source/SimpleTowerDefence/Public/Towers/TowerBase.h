@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Enemies/EnemyBase.h"
-#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Projectiles/ProjectileBase.h"
 #include "TowerBase.generated.h"
 
@@ -27,11 +27,15 @@ public:
 	UStaticMeshComponent* RootMeshComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
-	UBoxComponent* EnemyDetection = nullptr;;
+	USphereComponent* EnemyDetection = nullptr;
 
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* AuraMesh = nullptr;
+
+	UMaterialInstanceDynamic* AuraMaterialInstance = nullptr;	
 protected:
-	TArray<AEnemyBase*> _enemiesInRange;
 	float _timeSinceLastAttack = 0.f;
+	TArray<AEnemyBase*> _enemiesInRange;
 
 	UFUNCTION()
 	virtual void OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

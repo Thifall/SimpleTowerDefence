@@ -3,3 +3,30 @@
 
 #include "Towers/AreaDamageTower.h"
 
+void AAreaDamageTower::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	DealAreaDamage();
+}
+
+void AAreaDamageTower::DealAreaDamage()
+{
+	if (!IsAttackCooldownReady())
+	{
+		//cd nie gotowy
+		return;
+	}
+	//atakujemy wszystkich w zasiêgu
+	for (AEnemyBase* enemy : _enemiesInRange)
+	{
+		enemy->InflictDamage(BaseDamage, this);
+	}
+	if(AuraMaterialInstance)
+	{
+		double LastAttackTime = GetWorld()->GetTimeSeconds();
+		AuraMaterialInstance->SetScalarParameterValue(TEXT("AttackTime"), LastAttackTime);
+	}
+	//reset cd
+	_timeSinceLastAttack = 0.f;
+}
+

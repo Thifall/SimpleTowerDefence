@@ -49,9 +49,6 @@ void AProjectileTower::ClearIfWasCurrentTarget(AActor* OtherActor)
 
 void AProjectileTower::TryAttackTarget(float deltaTime)
 {
-	//cd liczymy zawsze
-	_timeSinceLastAttack += deltaTime;
-
 	if (!EnsureHasTarget())
 	{
 		//nie mamy celu
@@ -102,6 +99,7 @@ void AProjectileTower::ShootProjectileAtTarget()
 		spawnRotation,
 		FActorSpawnParameters()))
 	{
+		spawnedProjectile->Damage = BaseDamage;
 		spawnedProjectile->SetTarget(_currentTarget);
 	}
 }
