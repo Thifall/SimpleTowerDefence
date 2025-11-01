@@ -9,7 +9,7 @@
 #include "Projectiles/ProjectileBase.h"
 #include "TowerBase.generated.h"
 
-UCLASS(Blueprintable)
+UCLASS(Abstract)
 class SIMPLETOWERDEFENCE_API ATowerBase : public AActor
 {
 	GENERATED_BODY()
@@ -23,9 +23,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tower")
 	float AttackSpeed = 1.f; // Attacks per second
 
-	UPROPERTY(EditDefaultsOnly, Category = "Tower")
-	TSubclassOf<AProjectileBase> ProjectileClass = nullptr; 
-
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* RootMeshComponent = nullptr;
 
@@ -33,28 +30,22 @@ public:
 	UBoxComponent* EnemyDetection = nullptr;;
 
 protected:
-	AEnemyBase* _currentTarget = nullptr;
 	TArray<AEnemyBase*> _enemiesInRange;
 	float _timeSinceLastAttack = 0.f;
 
-public:
-
 	UFUNCTION()
-	void OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	virtual void OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void OnEnemyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	virtual void OnEnemyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
-	void OnTargetDestroyed(AActor* DestroyedActor);
+	virtual void OnTargetDestroyed(AActor* DestroyedActor);
 
-protected:
+
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void AttackTarget(float DeltaTime);
-	bool EnsureHasTarget();
-	bool IsShootCooldownReady();
-	void ShootProjectileAtTarget();
+	bool IsAttackCooldownReady();
 };

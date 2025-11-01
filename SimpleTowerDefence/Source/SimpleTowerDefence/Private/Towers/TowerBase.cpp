@@ -32,7 +32,6 @@ void ATowerBase::BeginPlay()
 void ATowerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	AttackTarget(DeltaTime);
 }
 
 void ATowerBase::OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -46,14 +45,6 @@ void ATowerBase::OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	// jak przeciwnik padnie, to musimy o tym wiedzieæ, ¿eby usun¹æ go z listy targetów
 	enemy->OnDestroyed.AddDynamic(this, &ATowerBase::OnTargetDestroyed);
 	_enemiesInRange.AddUnique(enemy);
-
-	//jak nie mamy innego celu, to ogieñ
-	if (!_currentTarget)
-	{
-		//na ten moment robimy to po prostu tak, ale mo¿e lepiej mimo wszystko braæ przeciwnika z indeksu 0? 
-		//gdyby overlap zbieg³ siê w czasie to mo¿emy ztargetowaæ œwie¿o "namierzonego" przeciwnika zamiast tego dalej posuniêtego na drodze
-		_currentTarget = enemy;
-	}
 }
 
 void ATowerBase::OnEnemyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -67,11 +58,6 @@ void ATowerBase::OnEnemyEndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	//jak przeciwnik poza zasiêgiem, to nie potrzebujemy o nim dalszych informacji
 	enemy->OnDestroyed.RemoveDynamic(this, &ATowerBase::OnTargetDestroyed);
 
-	//jeœli to by³ nasz cel, to pora zmieniæ cel
-	if (_currentTarget && OtherActor == _currentTarget)
-	{
-		_currentTarget = nullptr;
-	}
 	//wywalamy z listy targetów
 	_enemiesInRange.Remove(enemy);
 }
@@ -85,70 +71,10 @@ void ATowerBase::OnTargetDestroyed(AActor* DestroyedActor)
 	}
 	//nie wiem czy potrzebne, ale chyba nie zaszkodzi
 	enemy->OnDestroyed.RemoveDynamic(this, &ATowerBase::OnTargetDestroyed);
-	if (_currentTarget && DestroyedActor == _currentTarget)
-	{
-		_currentTarget = nullptr;
-	}
 	_enemiesInRange.Remove(enemy);
 }
 
-void ATowerBase::AttackTarget(float deltaTime)
-{
-	//cd liczymy zawsze
-	_timeSinceLastAttack += deltaTime;
-
-	if (!EnsureHasTarget())
-	{
-		//nie mamy celu
-		return;
-	}
-
-	if (!IsShootCooldownReady())
-	{
-		//dalej na cd
-		return;
-	}
-	ShootProjectileAtTarget();
-}
-
-bool ATowerBase::IsShootCooldownReady()
+bool ATowerBase::IsAttackCooldownReady()
 {
 	return _timeSinceLastAttack > (1 / AttackSpeed);
-}
-
-bool ATowerBase::EnsureHasTarget()
-{
-	bool hasTarget = false;
-	if (!_currentTarget)
-	{
-		if (_enemiesInRange.Num() > 0)
-		{
-			_currentTarget = _enemiesInRange[0];
-			hasTarget = true;
-		}
-	}
-	else
-	{
-		hasTarget = true;
-	}
-	return hasTarget;
-}
-
-void ATowerBase::ShootProjectileAtTarget()
-{
-	if (!ProjectileClass || !_currentTarget)
-	{
-		return;
-	}
-	_timeSinceLastAttack = 0.f;
-
-	FVector spawnLocation = GetActorLocation();
-	FRotator spawnRotation = (_currentTarget->GetActorLocation() - GetActorLocation()).Rotation();
-	FTransform spawnTransform(spawnRotation, spawnLocation);
-	AProjectileBase* spawnedProjectile = GetWorld()->SpawnActorDeferred<AProjectileBase>(ProjectileClass, spawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
-	if (spawnedProjectile)
-	{
-		spawnedProjectile->SetTarget(_currentTarget);
-		UGameplayStatics::FinishSpawningActor(spawnedProjectile, spawnTransform);
-	}
 }
