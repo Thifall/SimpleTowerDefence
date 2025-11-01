@@ -38,51 +38,74 @@ void ATowerBase::Tick(float DeltaTime)
 void ATowerBase::OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	_enemiesInRange.AddUnique(Cast<AEnemyBase>(OtherActor));
+	AEnemyBase* enemy = Cast<AEnemyBase>(OtherActor);
+	if (!enemy)
+	{
+		return;
+	}
+	// jak przeciwnik padnie, to musimy o tym wiedzieæ, ¿eby usun¹æ go z listy targetów
+	enemy->OnDestroyed.AddDynamic(this, &ATowerBase::OnTargetDestroyed);
+	_enemiesInRange.AddUnique(enemy);
+
+	//jak nie mamy innego celu, to ogieñ
 	if (!_currentTarget)
 	{
-		if (AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor))
-		{
-			_currentTarget = Enemy;
-			// Subscribe to enemy's destruction event
-			_currentTarget->OnDestroyed.AddDynamic(this, &ATowerBase::OnTargetDestroyed);
-		}
+		//na ten moment robimy to po prostu tak, ale mo¿e lepiej mimo wszystko braæ przeciwnika z indeksu 0? 
+		//gdyby overlap zbieg³ siê w czasie to mo¿emy ztargetowaæ œwie¿o "namierzonego" przeciwnika zamiast tego dalej posuniêtego na drodze
+		_currentTarget = enemy;
 	}
 }
 
 void ATowerBase::OnEnemyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	AEnemyBase* enemy = Cast<AEnemyBase>(OtherActor);
+	if (!enemy)
+	{
+		return;
+	}
+	//jak przeciwnik poza zasiêgiem, to nie potrzebujemy o nim dalszych informacji
+	enemy->OnDestroyed.RemoveDynamic(this, &ATowerBase::OnTargetDestroyed);
+
+	//jeœli to by³ nasz cel, to pora zmieniæ cel
 	if (_currentTarget && OtherActor == _currentTarget)
 	{
-		_currentTarget->OnDestroyed.RemoveDynamic(this, &ATowerBase::OnTargetDestroyed);
 		_currentTarget = nullptr;
 	}
-	_enemiesInRange.Remove(Cast<AEnemyBase>(OtherActor));
+	//wywalamy z listy targetów
+	_enemiesInRange.Remove(enemy);
 }
 
 void ATowerBase::OnTargetDestroyed(AActor* DestroyedActor)
 {
+	AEnemyBase* enemy = Cast<AEnemyBase>(DestroyedActor);
+	if (!enemy)
+	{
+		return;
+	}
+	//nie wiem czy potrzebne, ale chyba nie zaszkodzi
+	enemy->OnDestroyed.RemoveDynamic(this, &ATowerBase::OnTargetDestroyed);
 	if (_currentTarget && DestroyedActor == _currentTarget)
 	{
 		_currentTarget = nullptr;
 	}
-	_enemiesInRange.Remove(Cast<AEnemyBase>(DestroyedActor));
+	_enemiesInRange.Remove(enemy);
 }
 
 void ATowerBase::AttackTarget(float deltaTime)
 {
+	//cd liczymy zawsze
 	_timeSinceLastAttack += deltaTime;
 
 	if (!EnsureHasTarget())
 	{
-		// No target available
+		//nie mamy celu
 		return;
 	}
 
 	if (!IsShootCooldownReady())
 	{
-		// Still in cooldown
+		//dalej na cd
 		return;
 	}
 	ShootProjectileAtTarget();

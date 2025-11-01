@@ -53,24 +53,25 @@ void AProjectileBase::Tick(float DeltaTime)
 void AProjectileBase::SetTarget(AEnemyBase* InTarget)
 {
 	Target = InTarget;
+	Target->OnDestroyed.AddDynamic(this, &AProjectileBase::OnTargetDestroyed);
 }
 
 void AProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// Validate input parameters
+	//tu mi agent podpowiedzia³ jakiœ miks walidacji, sprawdzamy czy nasze wskaŸniki s¹ OK i czy przypadkiem ju¿ siê nie "zderzyliœmy"
 	if (!OtherActor || !OtherComp || bHasImpacted)
 	{
 		return;
 	}
 
-	// Check if we hit an enemy
+	//czy trafiliœmy w przeciwnika
 	AEnemyBase* HitEnemy = Cast<AEnemyBase>(OtherActor);
 	if (!HitEnemy)
 	{
 		return;
 	}
-	// If we have a target, only damage that specific target
+	//czy ten przeciwnik, to rzeczywiœcie nasz cel
 	if (Target)
 	{
 		if (HitEnemy != Target)
@@ -86,4 +87,16 @@ void AProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedCo
 	// Destroy the projectile
 	CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AProjectileBase::OnProjectileBeginOverlap);
 	Destroy();
+}
+
+void AProjectileBase::OnTargetDestroyed(AActor* DestroyedActor)
+{
+	// defensive check
+	if (DestroyedActor == Target)
+	{
+		Target = nullptr;
+		//Na ten moment mo¿na po prostu rozwaliæ, 
+		//w przysz³oœci mo¿na zapamiêtaæ ostatni¹ lokacjê celu i dolecieæ "do ziemi" tak gdzie cel sta³ jak zosta³ zniszczony
+		Destroy();
+	}
 }
