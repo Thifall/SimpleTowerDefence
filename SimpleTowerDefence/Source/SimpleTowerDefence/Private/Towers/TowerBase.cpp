@@ -62,8 +62,12 @@ void ATowerBase::OnEnemyBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		return;
 	}
 	// jak przeciwnik padnie, to musimy o tym wiedzieæ, ¿eby usun¹æ go z listy targetów
-	enemy->OnDestroyed.AddDynamic(this, &ATowerBase::OnTargetDestroyed);
-	_enemiesInRange.AddUnique(enemy);
+	// dodajemy tylko jeœli go jeszcze nie ma na liœcie (unreal mo¿e wywo³aæ overlap wielokrotnie dla tego samego aktora)
+	if (!_enemiesInRange.Contains(enemy))
+	{
+		enemy->OnDestroyed.AddDynamic(this, &ATowerBase::OnTargetDestroyed);
+		_enemiesInRange.Add(enemy);
+	}
 }
 
 void ATowerBase::OnEnemyEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
