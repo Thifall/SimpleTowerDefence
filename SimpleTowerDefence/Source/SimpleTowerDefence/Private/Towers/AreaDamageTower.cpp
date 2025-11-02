@@ -16,12 +16,13 @@ void AAreaDamageTower::DealAreaDamage()
 		//cd nie gotowy
 		return;
 	}
+
 	//atakujemy wszystkich w zasiêgu
 	for (AEnemyBase* enemy : _enemiesInRange)
 	{
 		enemy->InflictDamage(BaseDamage, this);
 	}
-	if(AuraMaterialInstance)
+	if (AuraMaterialInstance && _enemiesInRange.Num() > 0) //efekt wizualny tylko wtedy, gdy rzeczywiœcie atakujemy wrogów
 	{
 		double LastAttackTime = GetWorld()->GetTimeSeconds();
 		AuraMaterialInstance->SetScalarParameterValue(TEXT("AttackTime"), LastAttackTime);

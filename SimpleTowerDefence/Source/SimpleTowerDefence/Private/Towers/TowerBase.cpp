@@ -13,6 +13,12 @@ ATowerBase::ATowerBase()
 	EnemyDetection->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	EnemyDetection->SetGenerateOverlapEvents(true);
 
+	AuraMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AuraMesh"));
+	AuraMesh->SetupAttachment(RootComponent);
+	AuraMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AuraMesh->SetRelativeLocation(FVector(0.f, 0.f, 0.f)); // dostosuj wysokoœæ jak trzeba
+	AuraMesh->SetCastShadow(false);
+
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	_timeSinceLastAttack = AttackSpeed;
@@ -32,9 +38,9 @@ void ATowerBase::BeginPlay()
 		if (AuraMaterialInstance)
 		{
 			// ustaw pocz¹tkowe wartoœci parametrów
-			AuraMaterialInstance->SetScalarParameterValue(TEXT("AttackTime"), _timeSinceLastAttack);
+			AuraMaterialInstance->SetScalarParameterValue(TEXT("AttackTime"), -1000.f);
 			AuraMaterialInstance->SetScalarParameterValue(TEXT("Cooldown"), 1.f / AttackSpeed);
-			AuraMaterialInstance->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(0.2f, 0.5f, 1.f));
+			//AuraMaterialInstance->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(0.2f, 0.5f, 1.f));
 		}
 	}
 	return;

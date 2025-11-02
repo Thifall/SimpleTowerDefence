@@ -29,8 +29,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	USphereComponent* EnemyDetection = nullptr;
 
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* AuraMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tower")
+	UStaticMeshComponent* AuraMesh;
 
 	UMaterialInstanceDynamic* AuraMaterialInstance = nullptr;	
 protected:
