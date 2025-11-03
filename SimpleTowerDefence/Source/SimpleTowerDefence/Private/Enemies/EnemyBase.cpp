@@ -1,6 +1,7 @@
 #include "Enemies/EnemyBase.h"
 #include "UI/Enemies/EnemyHealthBarComponent.h"  
 #include "Components/CapsuleComponent.h"
+#include <Subsystems/ExperienceSubsystem.h>
 
 AEnemyBase::AEnemyBase()
 {
@@ -78,6 +79,11 @@ void AEnemyBase::OnDeath_Implementation()
 {
 	// Base implementation simply destroys the actor
 	// Override in BP to add effects/rewards before destroying
+	UExperienceSubsystem* expSubsystem = GetWorld()->GetSubsystem<UExperienceSubsystem>();
+	if (expSubsystem)
+	{
+		expSubsystem->AddExperiencePoints(ExperienceReward);
+	}
 	Destroy();
 }
 

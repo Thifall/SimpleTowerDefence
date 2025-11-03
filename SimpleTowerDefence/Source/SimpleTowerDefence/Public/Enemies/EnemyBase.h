@@ -48,6 +48,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Stats")
     float MaxHealth = 100.f;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy|Stats")
+    int ExperienceReward = 20;
+
     /** Current health points */
     UPROPERTY(BlueprintReadOnly, Category = "Enemy|Stats", meta = (AllowPrivateAccess = "true"))
     float CurrentHealth;
