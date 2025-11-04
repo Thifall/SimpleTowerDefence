@@ -9,7 +9,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExperienceGainedSignature, int, GainedExperiencePoints);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLevelUpSignature, int, NewLevel, int, RequiredExpForNextLevel);
 
-UCLASS()
+UCLASS(BlueprintType)
 class SIMPLETOWERDEFENCE_API UExperienceSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
