@@ -23,7 +23,7 @@ void UExperienceSubsystem::AddExperiencePoints(int experiencePoints)
 
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Dodano %d punktów doœwiadczenia."), experiencePoints));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("Dodano %d punktow doswiadczenia."), experiencePoints));
 	}
 	_currentExperience += experiencePoints;
 	OnExperienceGained.Broadcast(experiencePoints);

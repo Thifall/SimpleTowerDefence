@@ -2,6 +2,7 @@
 #include "UI/Enemies/EnemyHealthBarComponent.h"  
 #include "Components/CapsuleComponent.h"
 #include <Subsystems/ExperienceSubsystem.h>
+#include <Subsystems/PlayerHPSubsystem.h>
 
 AEnemyBase::AEnemyBase()
 {
@@ -64,7 +65,6 @@ float AEnemyBase::InflictDamage(float DamageAmount, AActor* DamageCauser)
 	if (CurrentHealth > 0.0f)
 	{
 		OnEnemyDamaged.Broadcast(DamageAmount, CurrentHealth);
-		OnDamaged(DamageAmount, CurrentHealth);
 	}
 	else
 	{
@@ -77,8 +77,6 @@ float AEnemyBase::InflictDamage(float DamageAmount, AActor* DamageCauser)
 
 void AEnemyBase::OnDeath_Implementation()
 {
-	// Base implementation simply destroys the actor
-	// Override in BP to add effects/rewards before destroying
 	UExperienceSubsystem* expSubsystem = GetWorld()->GetSubsystem<UExperienceSubsystem>();
 	if (expSubsystem)
 	{
@@ -87,16 +85,10 @@ void AEnemyBase::OnDeath_Implementation()
 	Destroy();
 }
 
-void AEnemyBase::OnDamaged_Implementation(float DamageAmount, float HealthRemaining)
-{
-	// Base implementation does nothing
-	// Override in BP to add damage effects/feedback
-}
-
 void AEnemyBase::OnReachedEnd_Implementation()
 {
-	// Base implementation simply destroys the actor
-	// Override in BP to handle reaching the end (e.g. damage player base)
+	UPlayerHPSubsystem* playerHPSubsystem = GetWorld()->GetSubsystem<UPlayerHPSubsystem>();
+	playerHPSubsystem->DecreaseHealth(1);
 	Destroy();
 }
 
