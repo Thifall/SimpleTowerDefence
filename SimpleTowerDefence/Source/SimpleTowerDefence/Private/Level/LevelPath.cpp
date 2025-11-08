@@ -14,34 +14,60 @@ void ALevelPath::BeginPlay()
 void ALevelPath::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	SpawnEnemy(DeltaTime);
+	TrySpawnNextEnemy(DeltaTime);
 }
 
-void ALevelPath::SpawnEnemy(float deltaTime)
+void ALevelPath::TrySpawnNextEnemy(float deltaTime)
 {
-	if (_spawnCooldown <= 0.0f && EnemiesToSpawn > 0)
+	_spawnCooldown += deltaTime;
+	if (_currentWaveIndex >= EnemyWaves.Num()) //nie ma wiêcej fal
 	{
-		UPathComponent* path = NewObject<UPathComponent>(this);
-
-		path->PathNodes.Empty();
-		for (ATargetPoint* targetPoint : PathNodes)
-		{
-			path->PathNodes.Add(targetPoint);
-		}
-
-		FTransform SpawnTransform(GetActorRotation(), GetActorLocation());
-		AEnemyBase* SpawnedEnemy = GetWorld()->SpawnActorDeferred<AEnemyBase>(EnemyClass, SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-		if (SpawnedEnemy)
-		{
-			SpawnedEnemy->SetPath(path);
-			UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
-		}
-
-		_spawnCooldown = SpawnInterval;
-		EnemiesToSpawn--;
+		// tu mo¿na dodaæ trigger eventu zakoñczenia wszystkich fal (np. zwyciêstwo gracza, nastêpny poziom z inn¹ œcie¿k¹ etc)
+		return;
 	}
-	else
+
+	if(EnemyWaves[_currentWaveIndex].EnemyList.Num() == 0) //Empty wave, skip
 	{
-		_spawnCooldown -= deltaTime;
+		//to siê nie powinno zdarzyæ, byæ mo¿e warto dodaæ logowanie b³êdu
+		return;
 	}
+
+	if (EnemyWaves[_currentWaveIndex].EnemyList.Num() <= _currentEnemyIndex) //fala zakoñczona
+	{
+		return;
+	}
+
+	if(EnemyWaves[_currentWaveIndex].SpawnInterval > _spawnCooldown)
+	{
+		//jeszcze nie czas na kolejnego przeciwnika
+		return;
+	}
+
+	UPathComponent* path = NewObject<UPathComponent>(this);
+	path->PathNodes.Empty();
+
+	for (ATargetPoint* targetPoint : PathNodes)
+	{
+		path->PathNodes.Add(targetPoint);
+	}
+
+	FTransform SpawnTransform(GetActorRotation(), GetActorLocation());
+	TSubclassOf<AEnemyBase> enemyClassToSpawn = EnemyWaves[_currentWaveIndex].EnemyList[_currentEnemyIndex];
+	AEnemyBase* SpawnedEnemy = GetWorld()->SpawnActorDeferred<AEnemyBase>(enemyClassToSpawn, SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+	if (SpawnedEnemy)
+	{
+		SpawnedEnemy->SetPath(path);
+		UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
+	}
+
+	_spawnCooldown = 0.0f;
+	_currentEnemyIndex++;
+}
+
+void ALevelPath::StartNextWave()
+{
+	_currentEnemyIndex = 0;
+	_spawnCooldown = 0.0f;
+	_currentWaveIndex++;
 }

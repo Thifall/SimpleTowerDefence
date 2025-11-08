@@ -7,6 +7,7 @@
 #include "Engine/TargetPoint.h"
 #include "Enemies/EnemyBase.h"
 #include "PathComponent.h"
+#include "EnemyWaveDetails.h"
 #include "LevelPath.generated.h"
 
 UCLASS()
@@ -15,17 +16,20 @@ class SIMPLETOWERDEFENCE_API ALevelPath : public AActor
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Path")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Level|Path")
 	TArray<ATargetPoint*> PathNodes;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level|Enemies")
 	TSubclassOf<AEnemyBase> EnemyClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level|Enemies")
+	TArray<FEnemyWaveDetails> EnemyWaves;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level|Enemies")
 	float SpawnInterval = 2.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
-	int EnemiesToSpawn = 5;
+
+	UFUNCTION(BlueprintCallable, Category = "Level|Path")
+	void StartNextWave();
 
 	ALevelPath();
 protected:
@@ -35,5 +39,8 @@ protected:
 
 private:
 	float _spawnCooldown = 0.0f;
-	void SpawnEnemy(float deltaTime);
+	int _currentWaveIndex = 0;
+	int _currentEnemyIndex = 0;
+
+	void TrySpawnNextEnemy(float deltaTime);
 };

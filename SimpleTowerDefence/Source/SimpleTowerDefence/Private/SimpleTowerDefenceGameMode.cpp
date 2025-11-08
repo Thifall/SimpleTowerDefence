@@ -14,11 +14,11 @@ void ASimpleTowerDefenceGameMode::BeginPlay()
 		playerHpSubsystem->OnPlayerDefeated.AddDynamic(this, &ASimpleTowerDefenceGameMode::HandleGameOver);
 	}
 	
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC)
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	if (pc)
 	{
-		PC->bShowMouseCursor = false;
-		PC->SetInputMode(FInputModeGameOnly());
+		pc->bShowMouseCursor = true;
+		pc->SetInputMode(FInputModeGameAndUI());
 	}
 }
 
@@ -40,7 +40,6 @@ void ASimpleTowerDefenceGameMode::HandleGameOver()
 			APlayerController* pc = GetWorld()->GetFirstPlayerController();
 			if (pc)
 			{
-				pc->bShowMouseCursor = true;
 				pc->SetInputMode(FInputModeUIOnly());
 			}
 		}
