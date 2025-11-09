@@ -4,6 +4,8 @@
 #include "SimpleTowerDefenceGameMode.h"
 #include "blueprint/UserWidget.h"
 #include <Subsystems/PlayerHPSubsystem.h>
+#include "Kismet/GameplayStatics.h"
+#include <Level/LevelPath.h>
 
 void ASimpleTowerDefenceGameMode::BeginPlay()
 {
@@ -13,7 +15,20 @@ void ASimpleTowerDefenceGameMode::BeginPlay()
 	{
 		playerHpSubsystem->OnPlayerDefeated.AddDynamic(this, &ASimpleTowerDefenceGameMode::HandleGameOver);
 	}
-	
+
+	TArray<AActor*> checked;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LevelPath"), checked);
+
+	if (checked.Num() > 0)
+	{
+		LevelPathData = Cast<ALevelPath>(checked[0]);
+	}
+
+	if (LevelPathData)
+	{
+		LevelPathData->OnLevelCompleted.AddDynamic(this, &ASimpleTowerDefenceGameMode::HandleLevelCompleted);
+	}
+
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	if (pc)
 	{
@@ -24,8 +39,6 @@ void ASimpleTowerDefenceGameMode::BeginPlay()
 
 void ASimpleTowerDefenceGameMode::HandleGameOver()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Game Over! The player has been defeated."));
-	// Additional game over logic can be added here, such as transitioning to a game over screen.
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Over! The player has been defeated. ModeHandler"));
@@ -37,6 +50,28 @@ void ASimpleTowerDefenceGameMode::HandleGameOver()
 		if (gameOverWidget)
 		{
 			gameOverWidget->AddToViewport(100);
+			APlayerController* pc = GetWorld()->GetFirstPlayerController();
+			if (pc)
+			{
+				pc->SetInputMode(FInputModeUIOnly());
+			}
+		}
+	}
+}
+
+void ASimpleTowerDefenceGameMode::HandleLevelCompleted()
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Level Completed!"));
+	}
+	GetWorld()->GetFirstPlayerController()->SetPause(true);
+	if (LevelCompletedWidgetClass)
+	{
+		UUserWidget* levelCompletedWidget = CreateWidget<UUserWidget>(GetWorld(), LevelCompletedWidgetClass);
+		if (levelCompletedWidget)
+		{
+			levelCompletedWidget->AddToViewport(100);
 			APlayerController* pc = GetWorld()->GetFirstPlayerController();
 			if (pc)
 			{

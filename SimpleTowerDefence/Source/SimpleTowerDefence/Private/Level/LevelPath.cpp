@@ -58,7 +58,7 @@ void ALevelPath::TrySpawnNextEnemy(float deltaTime)
 	if (SpawnedEnemy)
 	{
 		SpawnedEnemy->SetPath(path);
-		SpawnedEnemy->OnDestroyed.AddDynamic(this, &ALevelPath::OnEnemyDestroyed); 
+		SpawnedEnemy->OnDestroyed.AddDynamic(this, &ALevelPath::OnEnemyDestroyed);
 		UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
 		_spawnedEnemies.Add(SpawnedEnemy);
 	}
@@ -85,8 +85,22 @@ void ALevelPath::OnEnemyDestroyed(AActor* DestroyedActor)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Wave completed from LevelPath: %s"), *GetName()));
 		}
-		//wave completed
-		OnWaveCompleted.Broadcast();
+
+		if (_currentWaveIndex >= EnemyWaves.Num() - 1)
+		{
+			//all waves completed
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, TEXT("All waves completed!"));
+			}
+			OnLevelCompleted.Broadcast();
+		}
+		else
+		{
+			//wave completed
+			OnWaveCompleted.Broadcast();
+
+		}
 	}
 }
 

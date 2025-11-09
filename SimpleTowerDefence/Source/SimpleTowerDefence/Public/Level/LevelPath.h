@@ -11,6 +11,7 @@
 #include "LevelPath.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWaveCompletedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelCompletedSignature);
 
 UCLASS()
 class SIMPLETOWERDEFENCE_API ALevelPath : public AActor
@@ -35,6 +36,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Level|Path")
 	FOnWaveCompletedSignature OnWaveCompleted;
+
+	UPROPERTY(BlueprintAssignable, Category = "Level|Path")
+	FOnLevelCompletedSignature OnLevelCompleted;
 
 	ALevelPath();
 protected:
