@@ -10,7 +10,7 @@
 #include "UI/Enemies/EnemyHealthBarComponent.h"
 #include "EnemyBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDiedSignature, class AEnemyBase*, Enemy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDiedSignature, AEnemyBase*, Enemy);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEnemyDamagedSignature, float, Damage, float, RemainingHealth);
 
 /**

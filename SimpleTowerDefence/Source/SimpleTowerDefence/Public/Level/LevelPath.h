@@ -10,6 +10,8 @@
 #include "EnemyWaveDetails.h"
 #include "LevelPath.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWaveCompletedSignature);
+
 UCLASS()
 class SIMPLETOWERDEFENCE_API ALevelPath : public AActor
 {
@@ -31,16 +33,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level|Path")
 	void StartNextWave();
 
+	UPROPERTY(BlueprintAssignable, Category = "Level|Path")
+	FOnWaveCompletedSignature OnWaveCompleted;
+
 	ALevelPath();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+	//need to handle enemy destroyed to remove from _spawnedEnemies
+	UFUNCTION()
+	void OnEnemyDestroyed(AActor* DestroyedActor);
+
 private:
 	float _spawnCooldown = 0.0f;
 	int _currentWaveIndex = 0;
 	int _currentEnemyIndex = 0;
+	TArray<AEnemyBase*> _spawnedEnemies;
 
 	void TrySpawnNextEnemy(float deltaTime);
 };
