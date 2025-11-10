@@ -6,9 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "EnemyHealthBarComponent.generated.h"
 
-/**
- * 
- */
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SIMPLETOWERDEFENCE_API UEnemyHealthBarComponent : public UWidgetComponent
 {
