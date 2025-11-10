@@ -82,14 +82,14 @@ void AEnemyBase::OnDeath_Implementation()
 	{
 		expSubsystem->AddExperiencePoints(ExperienceReward);
 	}
-	Destroy();
+	SetLifeSpan(0.01f);
 }
 
 void AEnemyBase::OnReachedEnd_Implementation()
 {
 	UPlayerHPSubsystem* playerHPSubsystem = GetWorld()->GetSubsystem<UPlayerHPSubsystem>();
 	playerHPSubsystem->DecreaseHealth(1);
-	Destroy();
+	SetLifeSpan(0.01f);
 }
 
 void AEnemyBase::UpdateMovement(float DeltaTime)
