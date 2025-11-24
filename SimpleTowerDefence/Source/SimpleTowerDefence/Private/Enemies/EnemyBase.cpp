@@ -29,7 +29,6 @@ void AEnemyBase::BeginPlay()
 
 	// Initialize health
 	CurrentHealth = MaxHealth;
-	EnemyUI->SetWidgetClass(LoadClass<UUserWidget>(nullptr, TEXT("/Game/UI/Enemies/WBP_EnemyHealthBar.WBP_EnemyHealthBar_C")));
 	EnemyUI->SetRelativeLocation(FVector(0.f, 0.f, 120.f)); // nad g³ow¹ przeciwnika
 }
 
